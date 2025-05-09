@@ -1,0 +1,29 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.GroupView}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="true" ShowDelete="true" 
+                  OnNew="()=> NavManager.NavigateTo(Paths.GroupNew)"
+                  OnEdit='()=>NavManager.NavigateTo($"{Paths.GroupEdit}/{Id}")'
+                  OnBack="()=> NavManager.NavigateTo(Paths.GroupIndex)">
+</LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 80vh; height: 80vh">
+    <div class="col-12 col-sm-12 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mb-1">
+        <div class="form-outline mb-4">
+            <label>Group Name</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Name"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Description</label>
+            <InputTextArea rows="4" readonly="true" class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Center</label>
+            <InputText rows="6" readonly="true" class="form-control" @bind-Value="Entity.Center"/> 
+        </div>
+    </div>
+</div>

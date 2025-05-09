@@ -1,0 +1,173 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.LoanNew)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false)) //InteractiveServer
+@inject IToastService ToastService
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<EditForm id="loans" Model="@Entity" OnValidSubmit="OnSubmit" FormName="Loans">
+    
+    <LoanTrackToolbar ShowSubmit="true" ShowClear="true" OnClear="OnClear" OnBack="()=> navigationManager.NavigateTo(Paths.LoansIndex)">
+    </LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 75vh">
+        <DataAnnotationsValidator/>
+        <ValidationSummary />
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-7 col-xxl-7 mb-1 mb-xxl-3 mb-xl-3">
+            <div class="form-outline mb-2 card card-body">
+                <h5 class="card-title panel-title">Customer information</h5>
+                <div class="row mb-md-3 mb-lg-1">
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-md-1">
+                        <label class="required">Find Customer by NIC</label>
+                        <div class="input-group mb-3">
+                            <InputText class="form-control" @bind-Value="_nic"/>
+                            <button disabled="@(string.IsNullOrEmpty(_nic))" class="btn btn-success" type="button" @onclick="FindCustomerByNic">Find</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-1">
+                        <label>Loan Number</label>
+                        <InputText readonly="true" class="form-control" @bind-Value="Entity.LoanNumber"/>
+                    </div>
+                </div>
+                <InputTextArea rows="5" readonly="true" class="form-control" @bind-Value="SelectedCustomer"></InputTextArea>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-5 col-xxl-5 mb-3">
+            <div class="form-outline mb-2 card card-body">
+                <div class="row mb-2">
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-md-1">
+                        <label>Scheme</label>
+                        <SearchableSelect T="Guid" ListValues="_schemes" SelectedValue="_selectedScheme" SelectedValueChanged="@OnSchemeChanged">
+                        </SearchableSelect>
+                        <ValidationMessage For="@(() => Entity.LoanSchemeId)"/>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                        <label class="required">Amount</label>
+                        <InputNumber TValue="double" class="form-control" @bind-Value="Entity.LoanAmount"/>
+                        <ValidationMessage For="@(() => Entity.LoanAmount)"/>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-md-1">
+                        <label>Issuance</label>
+                        <InputDate class="form-control" @bind-Value="Entity.IssuanceDate"/>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                        <label>Disbursement</label>
+                        <InputSelect class="form-control" @bind-Value="Entity.LoanDisbursementMethod">
+                            @foreach (var method in _disbursementMethods)
+                            {
+                                <option value="@method">@method</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="row mb-xxl-3 mb-xl-3">
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                        <label class="required">Processing Fee</label>
+                        <InputNumber TValue="double" class="form-control" @bind-Value="Entity.ProcessingFee"/>
+                        <ValidationMessage For="@(() => Entity.ProcessingFee)"/>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                        <label class="required">Insurance</label>
+                        <InputNumber TValue="double" class="form-control" @bind-Value="Entity.InsuranceAmount"/>
+                        <ValidationMessage For="@(() => Entity.InsuranceAmount)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-7 col-xxl-7 mb-1">
+            <div class="form-outline mb-4 card card-body">
+                <h5 class="card-title panel-title">Interest</h5>
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 mb-md-3">
+                        <label class="required">Type</label>
+                        @if (SelectedScheme != null)
+                        {
+                            <input class="form-control" value="@SelectedScheme.InterestType" readonly/>
+                        }
+                        else
+                        {
+                            <InputSelect class="form-control" TValue="string" @bind-Value="Entity.InterestType" @bind-Value:event="onchange" ValueChanged="GetInstallmentTypes">
+                                @foreach (var type in _interestTypes)
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </InputSelect>
+                        }
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 mb-md-3">
+                        <label class="required">Rate(%)</label>
+                        <InputNumber class="form-control" @bind-Value="Entity.InterestRate" readonly="@(SelectedScheme != null)"/>
+                        <ValidationMessage For="@(() => Entity.InterestRate)"/>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4">
+                        <label class="required">@($"Duration in {GetBaseUnit(Entity.InterestType)}")</label>
+                        <InputNumber TValue="int" class="form-control" @bind-Value="Entity.DurationInInterestUnits"
+                                     @bind-Value:event="onchange" ValueChanged="OnDurationInInterestUnitsChanged"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-outline mb-3 card card-body">
+                <h5 class="card-title panel-title">Installment</h5>
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 mb-md-3">
+                        <label class="required">Type</label>
+                        <InputSelect class="form-control" TValue="string" @bind-Value="Entity.InstallmentType"
+                                     @bind-Value:event="onchange" ValueChanged="OnInstallmentTypeChanged">
+                            @foreach (var type in _installmentTypes)
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-3 col-xxl-3 mb-md-3">
+                        <label class="required">Duration</label>
+                        <InputNumber class="form-control" @bind-Value="Entity.RepaymentDurations" TValue="int"
+                                     @bind-Value:event="onchange" ValueChanged="OnDurationChanged"></InputNumber>
+                        <ValidationMessage For="@(() => Entity.RepaymentDurations)"/>
+                    </div>
+                    <div class="col-sm-12 col-md-12 col-lg-4 col-xl-5 col-xxl-5">
+                        <label class="required">Amount</label>
+                        <div class="input-group">
+                            <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InstallmentAmount"/>
+                            <button class="btn btn-success" type="button" @onclick="CalculateInstallment">Cal</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-outline">
+                        <label>Repayment Method</label>
+                        <InputSelect class="form-control" @bind-Value="Entity.LoanRepaymentMethod">
+                            @foreach (var method in _repaymentMethods)
+                            {
+                                <option value="@method">@method</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-5 col-xxl-5 mb-1">
+            <div class="form-outline mb-4">
+                <label>Guarantors Information</label>
+                <InputTextArea rows="3" class="form-control" @bind-Value="Entity.GuarantorsInformation"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.GuarantorsInformation)"/>
+            </div>
+            <div class="form-outline mb-xl-2 mb-xxl-2 mb-3 row">
+                <div class="col-6 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <label>First Installment Date</label>
+                    <InputDate DisplayName="Date of birth" class="form-control" @bind-Value="Entity.FirstInstallmentDate"/>
+                </div>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Loan Officer</label>
+                <InputTextArea rows="3" class="form-control" @bind-Value="Entity.LoanOfficer"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.LoanOfficer)"/>
+            </div>
+        </div>
+    </div>
+</EditForm>

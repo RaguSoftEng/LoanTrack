@@ -1,0 +1,103 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.CustomerView}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="true" ShowDelete="true"
+                  OnBack="()=> NavManager.NavigateTo(Paths.CustomersIndex)"
+                  OnNew="()=> NavManager.NavigateTo(Paths.CustomerNew)"
+                  OnEdit='()=> NavManager.NavigateTo($"{Paths.CustomerEdit}/{Id}")'>
+</LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 80vh">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+        <div class="form-outline mb-4">
+            <label>Code</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Code"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>FullName</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.FullName"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>NIC</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Nic"/>
+        </div>
+        <div class="form-outline row mb-4">
+            <div class="col-6">
+                <label>Gender</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Gender"/>
+            </div>
+            <div class="col-6">
+                <label>Date of birth</label>
+                <InputDate readonly="true" class="form-control" @bind-Value="Entity.DateOfBirth"/>
+            </div>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Email</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Email"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Phone Number</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.PhoneNumber"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Occupation</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Occupation"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Work or Business Address</label>
+            <InputTextArea readonly="true" DisplayName="Work or Business Address" class="form-control" @bind-Value="Entity.WokAddress"/>
+        </div>
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+        <div class="form-outline mb-4">
+            <label>Province</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Province"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>District</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.District"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>DS Division</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.DsDivision"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Address</label>
+            <InputTextArea readonly="true" class="form-control" @bind-Value="Entity.Address"></InputTextArea>
+        </div>
+        <div class="form-outline mb-4">
+            <label>GramaNiladhari</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.GramaNiladhari"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Center</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Center"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Group</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Group"/>
+        </div>
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+        <div class="form-outline mb-4">
+            <label>Bank</label>
+            <InputText readonly="true" DisplayName="Bank" class="form-control" @bind-Value="Entity.BankName"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Bank branch</label>
+            <InputText readonly="true" DisplayName="Phone Number" class="form-control" @bind-Value="Entity.BankBranch"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Account Name</label>
+            <InputText readonly="true" DisplayName="Phone Number" class="form-control" @bind-Value="Entity.AccountName"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Account Number</label>
+            <InputText readonly="true" DisplayName="Phone Number" class="form-control" @bind-Value="Entity.BankAccountNumber"/>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+﻿@using LoanTrack.Web.Shared.Common
+@inherits LayoutComponentBase
+<BlazoredToasts/>
+<div class="page">
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu/>
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                    <h5>@_pageName</h5>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <main style="background-image: url('Images/signInBg.jpg'); background-size: cover">
+                <article>
+                    @Body
+                </article>
+            </main>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code
+{
+    [Inject] AppSettingState AppSetting { get; set; } = new();
+    private string _pageName = "Home";
+
+    protected override void OnInitialized()
+    {
+        AppSetting.OnSettingsChanged += UpdatePageName;
+    }
+    
+    private void UpdatePageName(string newName)
+    {
+        _pageName = newName;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        AppSetting.OnSettingsChanged -= UpdatePageName;
+    }
+    
+}

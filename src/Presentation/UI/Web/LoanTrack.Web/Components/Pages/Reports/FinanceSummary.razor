@@ -1,0 +1,48 @@
+@page "/FinanceSummary"
+@using LoanTrack.Domain.Common.Constants
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = EmployeeRoles.Admin)]
+@rendermode InteractiveServer
+
+<div class="row">
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3">
+        <label class="form-label">Start Date</label>
+        <InputDate TValue="DateOnly" class="form-control" @bind-Value="_startDate"></InputDate>
+    </div>
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3">
+        <label class="form-label">End Date</label>
+        <InputDate TValue="DateOnly" class="form-control" @bind-Value="_endDate"></InputDate>
+    </div>
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3 listView-actions">
+        <button type="button" class="btn btn-outline-success" @onclick="GetDataAsync">
+            <i class="bi bi-search btn-icon"></i> Search
+        </button>
+        @if (_response is not null)
+        {
+            <button type="button" class="btn btn-outline-success d-none d-lg-block" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print
+            </button>
+        }
+    </div>
+</div>
+
+@if (_response is not null)
+{
+    <div class="card border-success p-0 print-section">
+        <div class="card-header">
+            <h3>@($"Income Statement for {_startDate} to {_endDate}")</h3>
+        </div>
+        <div class="card-body scrollable-container">
+            <div class="list-group list-group-flush">
+                @DisplayItem("Total Collection", _response.TotalCollection)
+                @DisplayItem("Total Insurance", _response.TotalInsurance)
+                @DisplayItem("Total Loan Issued", _response.TotalLoanIssued)
+                @DisplayItem("Total Processing Fee", _response.TotalProcessFee)
+                @DisplayItem("Total Capital Gain", _response.TotalCapitalGain)
+                @DisplayItem("Total Interest Income", _response.TotalInterestIncome)
+                @DisplayItem("Total Penalty", _response.TotalPenalty)
+                @DisplayItem("Total Profit", _response.TotalProfit, true)
+            </div>
+        </div>
+    </div>
+}

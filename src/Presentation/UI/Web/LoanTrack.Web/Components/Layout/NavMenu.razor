@@ -1,0 +1,155 @@
+﻿@using LoanTrack.Domain.Common.Constants
+@using LoanTrack.Domain.ListValues
+@using LoanTrack.Presentation.Common
+@using LoanTrack.Web.Shared.Common
+@implements IDisposable
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+          <img src="favicon.png" alt="Logo" class="logo"/>  LoanTrack
+        </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column h-100">
+        <AuthorizeView>
+            <Authorized>
+                <section style="height: 88%; border-bottom: 1px solid #ffffff; overflow-y: auto">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link text-white" href="" Match="NavLinkMatch.All">
+                            <span class="bi bi-speedometer" aria-hidden="true"></span> Dashboard
+                        </NavLink>
+                    </div>
+
+                    @if (context.User.IsInAnyRole(EmployeeRoles.Admin, EmployeeRoles.Manager))
+                    {
+                        <div class="nav-item px-3">
+                            <a class="nav-link d-flex text-white justify-content-between align-items-center" data-bs-toggle="collapse" href="#reports" role="button"
+                               aria-expanded="false" aria-controls="reports">
+                                <span><span class="bi bi-bar-chart" aria-hidden="true"></span> Reports</span>
+                                <span class="bi bi-chevron-down"></span>
+                            </a>
+                            <div class="collapse ps-3" id="reports">
+                                <NavLink class="nav-link small" href="/Collections">
+                                    <span class="bi bi-basket"></span> Collections
+                                </NavLink>
+                                @if (context.User.IsInRole(EmployeeRoles.Admin))
+                                {
+                                    <NavLink class="nav-link small" href="/FinanceSummary">
+                                        <span class="bi bi-cash-coin"></span> Finance
+                                    </NavLink>
+                                }
+                                <NavLink class="nav-link small" href="/LoanSummary">
+                                    <span class="bi bi-list-columns"></span> Loan Summary
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="nav-item px-3">
+                        <a class="nav-link d-flex text-white justify-content-between align-items-center" data-bs-toggle="collapse" href="#configurations" role="button"
+                           aria-expanded="false" aria-controls="configurations">
+                            <span><span class="bi bi-gear-wide-connected" aria-hidden="true"></span> Configurations</span>
+                            <span class="bi bi-chevron-down"></span>
+                        </a>
+                        <div class="collapse ps-3" id="configurations">
+                            <NavLink class="nav-link small" href="@(string.Format(Paths.ListValuesIndex, ListTypes.PROVINCES))">
+                                <span class="bi bi-globe"></span> Provinces
+                            </NavLink>
+                            <NavLink class="nav-link small" href="@(string.Format(Paths.ListValuesIndex, ListTypes.DISTRICTS))">
+                                <span class="bi bi-map"></span> Districts
+                            </NavLink>
+                            <NavLink class="nav-link small" href="@(string.Format(Paths.ListValuesIndex, ListTypes.DsDivisions))">
+                                <span class="bi bi-building"></span> DS Divisions
+                            </NavLink>
+                            <NavLink class="nav-link small" href="@(string.Format(Paths.ListValuesIndex, ListTypes.GRAMANILADHARI))">
+                                <span class="bi bi-geo-alt"></span> Gramanilashari
+                            </NavLink>
+                            <NavLink class="nav-link" href="@Paths.CentersIndex">
+                                <span class="bi bi-geo" aria-hidden="true"></span> Centers
+                            </NavLink>
+                            <NavLink class="nav-link" href="@Paths.GroupIndex">
+                                <span class="bi bi-people" aria-hidden="true"></span> Groups
+                            </NavLink>
+                            <NavLink class="nav-link text-white" href="@Paths.SchemesIndex">
+                                <span class="bi bi-book" aria-hidden="true"></span> Loan Schemes
+                            </NavLink>
+                            @if (context.User.IsInRole(EmployeeRoles.Admin))
+                            {
+                                <NavLink class="nav-link text-white" href="@Paths.EmployeesIndex">
+                                    <span class="bi bi-person" aria-hidden="true"></span> Employees
+                                </NavLink>
+                            }
+                        </div>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link text-white" href="@Paths.CustomersIndex">
+                            <span class="bi bi-person" aria-hidden="true"></span> Customers
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link text-white" href="@Paths.LoansIndex">
+                            <span class="bi bi-wallet2" aria-hidden="true"></span> Loans
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link text-white" href="@Paths.NextInstallmentsIndex">
+                            <span class="bi bi-paypal" aria-hidden="true"></span> Installments
+                        </NavLink>
+                    </div>
+                </section>
+
+                <div class="nav-item p-0">
+                    <NavLink class="nav-link text-white" href="Account/Manage">
+                        <span class="bi bi-person-fill" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item p-0">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken/>
+                        <input type="hidden" name="ReturnUrl" value="@_currentUrl"/>
+                        <button type="submit" class="nav-link text-white">
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private string? _currentUrl;
+
+    protected override void OnInitialized()
+    {
+        _currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+    
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+}

@@ -1,0 +1,93 @@
+@using LoanTrack.Domain.Common.Constants
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.InstallmentPayment)]
+@attribute [Route(Paths.NextInstallmentPayment)]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+
+
+<EditForm id="loans" Model="@_entity" OnValidSubmit="OnSubmit" FormName="Loans">
+    <LoanTrackToolbar ShowSubmit="true"></LoanTrackToolbar>
+    <div class="row scrollable-container" style="max-height: 73vh">
+        <DataAnnotationsValidator/>
+        <ValidationSummary />
+        <div class="col-sm-12 col-lg-6 mb-1">
+            <div class="card card-body mb-4">
+                <h4 class="card-title panel-title">Installment Info</h4>
+                <div class="row mb-3">
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Loan No#</label>
+                        <input type="text" readonly class="form-control" value="@_entity.LoanNumber">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Inst No#</label>
+                        <input type="text" readonly class="form-control" value="@_entity.InstallmentNumber">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Inst Date</label>
+                        <input readonly class="form-control" value="@_entity.InstallmentDate">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Amount</label>
+                        <input readonly class="form-control" value="@_entity.InstallmentAmount">
+                    </div>
+                </div>
+            </div>
+
+            @if (_entity.IsDelayed)
+            {
+                <div class="card card-body border-danger mb-4">
+                    <h4 class="card-title panel-title">Penalty</h4>
+                    <div class="alert d-flex align-items-center" style="background-color: firebrick" role="alert">
+                        <span class="card-text delayedWarning"><i class="bi bi-bell-slash"></i> @($"Delayed for {_entity.DelayedDays} days!.")</span>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12 col-xl-6">
+                            <InputCheckbox class="form-check-input" @bind-Value="_entity.IsPenaltyApplied"/>
+                            <label class="form-check-label">Is Penalty Applied?</label>
+                        </div>
+                        <div class="col-sm-12 col-xl-6">
+                            <label>Penalty Amount</label>
+                            <InputNumber TValue="double" class="form-control" @bind-Value="_entity.PenaltyAmount" @bind-Value:event="onchange" ValueChanged="IncludePenalty"></InputNumber>
+                        </div>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label>Penalty Reason</label>
+                        <InputTextArea rows="3" class="form-control" @bind-Value="_entity.PenaltyReason"></InputTextArea>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-sm-12 col-lg-6 mb-1">
+            <div class="card card-body">
+                <h5 class="card-title panel-title">Payment</h5>
+                <div class="row mb-3">
+                    <div class="col-sm-12 col-xl-4">
+                        <label>Payment Date</label>
+                        <InputDate class="form-control" @bind-Value="_entity.PaymentDate"></InputDate>
+                    </div>
+                    <div class="col-sm-12 col-xl-4">
+                        <label>Payment Method</label>
+                        <InputSelect class="form-select" @bind-Value="_entity.PaymentMethod">
+                            @foreach (var method in LoanRepaymentMethods.GetMethods)
+                            {
+                                <option value="@method">@method</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="col-sm-12 col-xl-4">
+                        <label>Amount Payable</label>
+                        <InputNumber class="form-control" @bind-Value="_entity.PaidAmount"></InputNumber>
+                    </div>
+                </div>
+                <div class="form-outline">
+                    <label>Description</label>
+                    <InputTextArea rows="3" class="form-control" @bind-Value="_entity.PaymentDescription"></InputTextArea>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>

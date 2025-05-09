@@ -1,0 +1,31 @@
+namespace LoanTrack.Application.Customers.Queries.GetCustomer;
+
+public sealed record CustomerResponse(
+    Guid Id,
+    string Code,
+    string Nic,
+    string FullName,
+    string Gender,
+    string Email,
+    string PhoneNumber,
+    string Address,
+    Guid GramaNiladhariId,
+    string GramaNiladhari,
+    Guid DsDivisionId,
+    string DsDivision,
+    Guid DistrictId,
+    string District,
+    Guid ProvinceId,
+    string Province,
+    Guid CenterId,
+    string Center,
+    Guid? GroupId,
+    string Group,
+    string Occupation,
+    DateOnly DateOfBirth,
+    string BankName,
+    string Branch,
+    string BankAccountNumber,
+    string AccountName,
+    string WorkAddress
+);

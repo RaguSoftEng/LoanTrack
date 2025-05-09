@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <UserSecretsId>aspnet-LoanTrack.Web-bff41bc6-0ae1-4d7a-97b6-b08c30cb4816</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <DockerfileContext>..\..\..\..\..</DockerfileContext>
+        <DockerComposeProjectPath>..\..\..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\..\..\aspire\LoanTrack.ServiceDefaults\LoanTrack.ServiceDefaults.csproj" />
+        <ProjectReference Include="..\..\..\..\Infrastructure\LoanTrack.Identity\LoanTrack.Identity.csproj" />
+        <ProjectReference Include="..\..\..\..\Infrastructure\LoanTrack.Persistence\LoanTrack.Persistence.csproj" />
+        <ProjectReference Include="..\..\..\LoanTrack.Presentation\LoanTrack.Presentation.csproj" />
+        <ProjectReference Include="..\LoanTrack.Web.Client\LoanTrack.Web.Client.csproj" />
+        <PackageReference Include="Blazored.Toast" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+        <ProjectReference Include="..\LoanTrack.Web.Shared\LoanTrack.Web.Shared.csproj" />
+    </ItemGroup>
+
+</Project>

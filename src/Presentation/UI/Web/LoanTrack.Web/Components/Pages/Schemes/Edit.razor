@@ -1,0 +1,144 @@
+@using LoanTrack.Domain.Common.Constants
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.SchemesEdit}/{{Id}}")]
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<EditForm id="customers" Model="@Entity" OnValidSubmit="OnSubmit" FormName="customers">
+    
+    <LoanTrackToolbar ShowSubmit="true" ShowClear="true" OnBack="()=> navManager.NavigateTo(Paths.SchemesIndex)">
+    </LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 80vh">
+        <DataAnnotationsValidator/>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="mb-4">
+                <label>Scheme Code</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Code"/>
+            </div>
+            <div class="mb-4">
+                <label>Scheme Name</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Name"/>
+                <ValidationMessage For="@(() => Entity.Name)"/>
+            </div>
+            <div class="mb-4">
+                <label>Description</label>
+                <InputTextArea class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.Description)"/>
+            </div>
+            <div class="mb-4">
+                <label>Interest Type</label>
+                <InputSelect class="form-control" @bind-Value="Entity.InterestType">
+                    @foreach (var type in InterestTypes.GetTypes)
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-4">
+                <label>Interest Rate (%)</label>
+                <InputNumber class="form-control" @bind-Value="Entity.InterestRate"/>
+                <ValidationMessage For="@(() => Entity.InterestRate)"/>
+            </div>
+            <div class="mb-4">
+                <label>Minimum Amount</label>
+                <InputNumber class="form-control" @bind-Value="Entity.MinimumAmount"/>
+                <ValidationMessage For="@(() => Entity.MinimumAmount)"/>
+            </div>
+            <div class="mb-4">
+                <label>Maximum Amount</label>
+                <InputNumber class="form-control" @bind-Value="Entity.MaximumAmount"/>
+                <ValidationMessage For="@(() => Entity.MaximumAmount)"/>
+            </div>
+            <div class="mb-4">
+                <label>Repayment Period (Months)</label>
+                <InputNumber class="form-control" @bind-Value="Entity.RepaymentPeriodsInMonths"/>
+                <ValidationMessage For="@(() => Entity.RepaymentPeriodsInMonths)"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="mb-4">
+                <label>Processing Fee</label>
+                <InputNumber TValue="double" class="form-control" @bind-Value="Entity.ProcessingFee"/>
+                <ValidationMessage For="@(() => Entity.ProcessingFee)"/>
+            </div>
+            <div class="mb-4">
+                <label>Insurance Amount</label>
+                <InputNumber TValue="double" class="form-control" @bind-Value="Entity.InsuranceAmount"/>
+                <ValidationMessage For="@(() => Entity.InsuranceAmount)"/>
+            </div>
+            <div class="mb-4">
+                <label>Late Payment Penalty (%)</label>
+                <InputNumber class="form-control" @bind-Value="Entity.LatePaymentPenalty"/>
+                <ValidationMessage For="@(() => Entity.LatePaymentPenalty)"/>
+            </div>
+            <div class="mb-4">
+                <label>Prepayment Penalty (%)</label>
+                <InputNumber class="form-control" @bind-Value="Entity.InsuranceAmount"/>
+                <ValidationMessage For="@(() => Entity.InsuranceAmount)"/>
+            </div>
+            <div class="mb-4">
+                <label>Grace Period (Months)</label>
+                <InputNumber class="form-control" @bind-Value="Entity.GracePeriodInMonths"/>
+                <ValidationMessage For="@(() => Entity.GracePeriodInMonths)"/>
+            </div>
+            <div class="mb-4 form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="Entity.IsSecuredLoan"/>
+                <label class="form-check-label">Requires Collateral</label>
+            </div>
+            <div class="mb-4">
+                <label>Collateral Type</label>
+                <InputText class="form-control" @bind-Value="Entity.CollateralType"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="Entity.HasFixedInterestRate"/>
+                <label class="form-check-label">Has Fixed Interest Rate</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="Entity.IsGovernmentSubsidized"/>
+                <label class="form-check-label">Government Subsidized</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="Entity.RequiresGuarantor"/>
+                <label class="form-check-label">Requires Guarantor</label>
+            </div>
+            <div class="form-check mb-4">
+                <InputCheckbox class="form-check-input" @bind-Value="Entity.IsActive"/>
+                <label class="form-check-label">Is Active</label>
+            </div>
+            <div class="mb-4">
+                <h5>Allowed Loan Purposes:</h5>
+                <ul class="list-group">
+                    @foreach (var purpose in Entity.AllowedLoanPurposes)
+                    {
+                        <li class="list-group-item">@purpose</li>
+                    }
+                </ul>
+            </div>
+            <!-- Add Loan Purpose -->
+            <div class="input-group mb-4">
+                <input type="text" class="form-control" @bind="NewLoanPurpose" placeholder="Enter Loan Purpose" />
+                <button type="button" class="btn btn-primary" @onclick="AddLoanPurpose">Add</button>
+            </div>
+            <!-- Eligible Borrower Types Section -->
+            <div class="mb-4">
+                <h5>Eligible Borrower Types:</h5>
+                <ul class="list-group">
+                    @foreach (var type in Entity.EligibleBorrowerTypes)
+                    {
+                        <li class="list-group-item">@type</li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Add Borrower Type -->
+            <div class="input-group mb-4">
+                <input type="text" class="form-control" @bind="NewBorrowerType" placeholder="Enter Borrower Type" />
+                <button type="button" class="btn btn-primary" @onclick="AddBorrowerType">Add</button>
+            </div>
+        </div>
+    </div>
+</EditForm>

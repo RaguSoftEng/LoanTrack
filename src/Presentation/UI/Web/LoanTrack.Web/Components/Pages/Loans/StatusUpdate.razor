@@ -1,0 +1,74 @@
+@using LoanTrack.Domain.Common.Constants
+<div class="modal fade @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document" style="height: 70%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@_title</h5>
+                <button type="button" class="btn-close" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body align-content-center">
+                @if (Entity.LoanStatus != LoanStatuses.Ongoing)
+                {
+                    <div class="mb-4">
+                        <label>Issuance Date</label>
+                        <InputDate @bind-Value="Entity.IssuanceDate" class="form-control"/>
+                    </div>
+                    <div class="mb-4">
+                        <label>First Installment Date</label>
+                        <InputDate @bind-Value="Entity.FirstInstallmentDate" class="form-control"/>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-4">
+                        <label>Closed Date</label>
+                        <InputDate @bind-Value="Entity.ClosedDate" class="form-control"/>
+                    </div> 
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                <button type="button" class="btn btn-outline-success" @onclick="Submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public LoanViewModel Entity { get; set; } = new();
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<LoanViewModel> OnSubmit { get; set; }
+    private bool IsVisible { get; set; }
+
+    private string ModalClass => IsVisible ? "show" : "";
+    private string ModalDisplay => IsVisible ? "block" : "none";
+    private string _title = "Confirm the Issue date and First Installment date.";
+
+    protected override void OnParametersSet()
+    {
+        if (Entity.LoanStatus != LoanStatuses.Issued)
+        {
+            _title = "Confirm close date.";
+        }
+    }
+
+    public void Show()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+    
+    private async Task Submit()
+    {
+        await OnSubmit.InvokeAsync(Entity);
+        Close();
+    }
+}

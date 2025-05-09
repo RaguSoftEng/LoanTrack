@@ -1,0 +1,41 @@
+@using LoanTrack.Web.Shared.Common
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.InstallmentsIndexPath)]
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar></LoanTrackToolbar>
+<div class="row mt-5 scrollable-container" style="max-height: 70vh">
+    @if (_installments is { Count: > 0 })
+    {
+         @foreach (var entity in _installments)
+         {
+             <div class="card card-body w-100 mb-4" style="flex: 0 0 auto !important;">
+                 <h5 class="card-title panel-title">@($"{entity.InstallmentNumber.ToOrdinal()} at {entity.InstallmentDate.ToString()}")</h5>
+                 <div class="row">
+                     <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-1">
+                         <strong>@($"Inst Date: {entity.InstallmentAmount:##.00}")</strong>
+                     </div>
+                     <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-1">
+                         <strong>Payment Date: @entity.PaymentDate</strong>
+                     </div>
+                     <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-2">
+                         <strong>Paid Amount: @entity.AmountPaid</strong>
+                     </div>
+                     <div class="col-sm-12 col-md-12 col-lg-12 col-xl-3 listView-actions pt-lg-2 pt-xl-2">
+                         <a class="btn btn-outline-primary btn-sm" tabindex="-1" href="@(string.Format(Paths.InstallmentView, @entity.LoanId, entity.InstallmentId))">
+                             <i class="bi bi-eye-fill"></i> View
+                         </a>
+                         @if (!entity.IsPaid)
+                         {
+                             <a class="btn btn-outline-success btn-sm" tabindex="-1" href="@(string.Format(Paths.InstallmentPaymentPath, @entity.LoanId, entity.InstallmentId))">
+                                 <i class="bi bi-paypal"></i> Pay
+                             </a>
+                         }
+                     </div>
+                 </div>
+             </div>
+         }
+    }
+</div>

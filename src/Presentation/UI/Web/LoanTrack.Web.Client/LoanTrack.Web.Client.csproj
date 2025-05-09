@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+    <PropertyGroup>
+        <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+        <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Blazored.Toast" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication"/>
+    </ItemGroup>
+
+</Project>

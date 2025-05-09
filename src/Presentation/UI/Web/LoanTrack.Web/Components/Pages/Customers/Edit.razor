@@ -1,0 +1,131 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.CustomerEdit}/{{Id}}")]
+@rendermode InteractiveServer
+@*@(new InteractiveServerRenderMode(prerender: false))*@
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<EditForm id="customers" Model="@Entity" OnValidSubmit="OnSubmit" FormName="customers">
+    
+    <LoanTrackToolbar ShowSubmit="true" ShowNew="true" OnNew="()=> NavManager.NavigateTo(Paths.CustomerNew)"
+                      OnBack="()=> NavManager.NavigateTo(Paths.CustomersIndex)">
+    </LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 80vh">
+        <DataAnnotationsValidator/>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label>Code</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Code"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">FullName</label>
+                <InputText class="form-control" @bind-Value="Entity.FullName"/>
+                <ValidationMessage For="@(() => Entity.FullName)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">NIC</label>
+                <InputText DisplayName="Nic" class="form-control" @bind-Value="Entity.Nic"/>
+                <ValidationMessage For="@(() => Entity.Nic)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <div class="row">
+                    <div class="col-6">
+                        <label>Gender</label>
+                        <InputSelect class="form-select" @bind-Value="Entity.Gender">
+                            <option selected value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-6">
+                        <label class="required">Date of birth</label>
+                        <InputDate DisplayName="Date of birth" class="form-control" @bind-Value="Entity.DateOfBirth"/>
+                        <ValidationMessage For="@(() => Entity.DateOfBirth)"/>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-outline mb-4">
+                <label>Email</label>
+                <InputText DisplayName="Email" class="form-control" @bind-Value="Entity.Email"/>
+                <ValidationMessage For="@(() => Entity.Email)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">Phone Number</label>
+                <InputText DisplayName="Phone Number" class="form-control" @bind-Value="Entity.PhoneNumber"/>
+                <ValidationMessage For="@(() => Entity.PhoneNumber)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Occupation</label>
+                <InputText DisplayName="Occupation" class="form-control" @bind-Value="Entity.Occupation"/>
+                <ValidationMessage For="@(() => Entity.Occupation)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Work or Business Address</label>
+                <InputTextArea DisplayName="Work or Business Address" class="form-control" @bind-Value="Entity.WokAddress"/>
+                <ValidationMessage For="@(() => Entity.WokAddress)"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label>Province</label>
+                <SearchableSelect T="Guid" ListValues="_provinces" SelectedValue="Entity.ProvinceId" SelectedValueChanged="@OnSelectedProvinceChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.ProvinceId)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>District</label>
+                <SearchableSelect T="Guid" ListValues="_districts" SelectedValue="Entity.DistrictId" SelectedValueChanged="@OnSelectedDistrictChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.DistrictId)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>DS Division</label>
+                <SearchableSelect T="Guid" ListValues="_dsDivision" SelectedValue="Entity.DsDivisionId" SelectedValueChanged="@OnSelectedDsDivisionChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.DsDivisionId)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">Address</label>
+                <InputTextArea class="form-control" DisplayName="Address" @bind-Value="Entity.Address"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.Address)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>GramaNiladhari</label>
+                <SearchableSelect T="Guid" ListValues="_gramaNiladharies" SelectedValue="Entity.GramaNiladhariId" SelectedValueChanged="@OnSelectedGramaniladhariChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.GramaNiladhariId)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Center</label>
+                <SearchableSelect T="Guid" ListValues="_centers" SelectedValue="Entity.CenterId" SelectedValueChanged="@OnSelectedCenterChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.CenterId)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Group</label>
+                <SearchableSelect T="Guid" ListValues="_groups" SelectedValue="Entity.GroupId" SelectedValueChanged="@OnSelectedGroupChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.GroupId)"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label>Bank</label>
+                <InputText DisplayName="Bank" class="form-control" @bind-Value="Entity.BankName"/>
+                <ValidationMessage For="@(() => Entity.BankName)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Bank branch</label>
+                <InputText DisplayName="Phone Number" class="form-control" @bind-Value="Entity.BankBranch"/>
+                <ValidationMessage For="@(() => Entity.BankBranch)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Account Name</label>
+                <InputText DisplayName="Phone Number" class="form-control" @bind-Value="Entity.AccountName"/>
+                <ValidationMessage For="@(() => Entity.AccountName)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Account Number</label>
+                <InputText DisplayName="Phone Number" class="form-control" @bind-Value="Entity.BankAccountNumber"/>
+                <ValidationMessage For="@(() => Entity.BankAccountNumber)"/>
+            </div>
+        </div>
+    </div>
+</EditForm>

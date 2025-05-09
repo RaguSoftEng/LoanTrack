@@ -1,0 +1,28 @@
+@media screen and (min-width: 768px) {
+    .listView-actions{
+        padding-top: 2rem;
+    }
+    .scrollable-container{
+        max-height: 74vh;
+        height: 74vh;
+    }
+    
+}
+
+.rounded-pill{
+    line-height: 1rem !important;
+}
+
+@media screen and (max-width: 768px) {
+    .scrollable-container{
+        max-height: 54vh;
+        height: 54vh;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .scrollable-container{
+        max-height: 49vh;
+        height: 49vh;
+    }
+}

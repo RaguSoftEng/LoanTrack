@@ -1,0 +1,45 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.SchemesIndex)]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowBack="false" ShowNew="true" OnNew="()=> NavManager.NavigateTo(Paths.SchemesNew)"></LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 73vh">
+    @if (_schemes is { Count: > 0 })
+    {
+        @foreach (var scheme in _schemes)
+        {
+            <div class="card card-body w-100 mb-4" style="flex: 0 0 auto !important;">
+                <h5 class="card-title panel-title">@($"{scheme.Code} | {scheme.Name}")</h5>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Interest Rate(%): </strong>@scheme.InterestRate
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Max-Amount(LKR): </strong>@scheme.MaximumAmount
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>RepaymentPeriods(M): </strong>@scheme.RepaymentPeriodsInMonths
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Guarantor: </strong>@(scheme.RequiresGuarantor ? "Required" : "Not Required")
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Status: </strong>@(scheme.IsActive ? "Active" : "InActive")
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 listView-actions pt-lg-2 pt-xl-2">
+                        <a class="btn btn-outline-primary btn-sm" tabindex="-1" href="@($"{Paths.SchemesView}/{scheme.Id}")">
+                            <i class="bi bi-eye-fill"></i> View
+                        </a>
+                        <a class="btn btn-outline-dark btn-sm" tabindex="-1" href="@($"{Paths.SchemesEdit}/{scheme.Id}")">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

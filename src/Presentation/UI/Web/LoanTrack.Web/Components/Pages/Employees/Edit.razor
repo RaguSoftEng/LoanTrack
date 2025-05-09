@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.EmployeeEdit}/{{Id}}")]
+@rendermode InteractiveServer
+
+@inject NavigationManager NavManager
+@attribute [Authorize(Roles = "Admin")]
+
+<BlazoredToasts/>
+<EditForm id="employee" Model="@Entity" OnValidSubmit="OnSubmit" FormName="Employee">
+    <LoanTrackToolbar ShowSubmit="true" ShowNew="true" OnNew="()=> NavManager.NavigateTo(Paths.EmployeeNew)"
+                      OnBack="()=> NavManager.NavigateTo(Paths.EmployeesIndex)">
+    </LoanTrackToolbar>
+    
+        <div class="row scrollable-container" style="max-height: 80vh;">
+        <DataAnnotationsValidator/>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xxl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label>Email</label>
+                <input class="form-control" readonly="readonly" @bind="Entity.Email"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">First Name</label>
+                <InputText DisplayName="First Name" class="form-control" @bind-Value="Entity.FirstName"/>
+                <ValidationMessage For="@(() => Entity.FirstName)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">Last Name</label>
+                <InputText DisplayName="Last Name" class="form-control" @bind-Value="Entity.LastName"/>
+                <ValidationMessage For="@(() => Entity.LastName)"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xxl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label class="required">User Role</label>
+                <select class="form-select" @bind="Entity.UserRole">
+                    @foreach (var role in UserRoles)
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => Entity.UserRole)"/>
+            </div>
+        </div>
+    </div>
+    
+</EditForm>

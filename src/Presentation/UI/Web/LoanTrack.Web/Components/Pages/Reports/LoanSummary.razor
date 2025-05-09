@@ -1,0 +1,110 @@
+@page "/LoanSummary"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<div class="row">
+    <div class="col-12 col-md-6 col-xl-3 mb-2">
+        <label class="form-label">Center</label>
+        <SearchableSelect T="Guid" ListValues="_centers"
+                          Placeholder="--- All Centers ---"
+                          SelectedValue="@_selectedCenterId" SelectedValueChanged="@OnCenterSelected">
+        </SearchableSelect>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 mb-2">
+        <label class="form-label">Group</label>
+        <SearchableSelect T="Guid" ListValues="_groups"
+                          Placeholder="--- All Groups ---"
+                          SelectedValue="@_selectedGroupId" SelectedValueChanged="@OnGroupSelected">
+        </SearchableSelect>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-xl-2 col-xxl-3 mb-2">
+        <label class="form-label">Customer NIC</label>
+        <InputText class="form-control" @bind-Value="_customerNic"></InputText>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-xl-4 col-xxl-3 listView-actions pt-4">
+        <div class="form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="_includeClosed"></InputCheckbox>
+            <label class="form-check-label">
+                Include Closed
+            </label>
+        </div>
+        <button class="btn btn-outline-success" @onclick="ApplyFilterAsync">
+            <i class="bi bi-search btn-icon"></i> Apply
+        </button>
+    </div>
+</div>
+
+<div class="row scrollable-container" style="max-height: 76vh">
+    @if (_loanSummary is { Count: > 0 })
+    {
+        @foreach (var loan in _loanSummary)
+        {
+            <div class="card card-body w-100 mb-4" style="flex: 0 0 auto !important;">
+                <h5 class="card-title panel-title @GetStatus(loan.LoanStatus)">@loan.Customer | @loan.LoanNumber | @loan.LoanStatus</h5>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                        <strong>Amount: </strong>@loan.LoanAmount
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                        <strong>Total Payable: </strong>@loan.TotalPayable
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                        <strong>Capital Gained: </strong>@loan.CapitalGained
+                    </div>
+                    @if (loan.CapitalBalance > 0)
+                    {
+                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                            <strong>Capital Bal: </strong>@loan.CapitalBalance
+                        </div>
+                    }
+
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                        <strong>Interest Paid: </strong>@loan.InterestPaid
+                    </div>
+
+                    @if (loan.InterestBalance > 0)
+                    {
+                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                            <strong>Interest Bal: </strong>@loan.InterestBalance
+                        </div>
+                    }
+
+                    @if (loan.ProcessingFee > 0)
+                    {
+                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                            <strong>Processing Fee: </strong>@loan.ProcessingFee
+                        </div>
+                    }
+
+                    @if (loan.Insurance > 0)
+                    {
+                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                            <strong>Insurance: </strong>@loan.Insurance
+                        </div>
+                    }
+
+                    @if (loan.Penalty > 0)
+                    {
+                        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                            <strong>Penalty: </strong>@loan.Penalty
+                        </div>
+                    }
+
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 mb-1">
+                        <strong>Profit: </strong>@(loan.InterestPaid + loan.ProcessingFee + loan.Penalty)
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="text-center">
+                <i class="bi bi-database-x mb-4" style="font-size: 50px; color: #9e9e9e;"></i>
+                <h3 class="h4 mb-3">No Results Found</h3>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,33 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.EmployeeView}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="true" ShowDelete="true"
+                  OnBack="()=> NavManager.NavigateTo(Paths.EmployeesIndex)"
+                  OnNew="()=> NavManager.NavigateTo(Paths.EmployeeNew)"
+                  OnEdit='()=> NavManager.NavigateTo($"{Paths.EmployeeEdit}/{Id}")'>
+</LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 80vh">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xxl-4 mb-1">
+            <div class="form-outline mb-4">
+                <label class="required">First Name</label>
+                <input class="form-control" @bind="Entity.FirstName" readonly="readonly"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">Last Name</label>
+                <input class="form-control" @bind="Entity.LastName" readonly="readonly"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Email</label>
+                <input class="form-control" @bind="Entity.Email" readonly="readonly"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label class="required">User Role</label>
+                <input class="form-control" @bind="Entity.UserRole" readonly="readonly"/>
+            </div>
+        </div>
+</div>

@@ -1,0 +1,163 @@
+@using LoanTrack.Application.Customers.Queries.GetCustomer
+@using LoanTrack.Domain.Customers
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.CustomersIndex)]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject IJSRuntime Js
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowBack="false" ShowNew="true"
+                  @ref="_toolbar"
+                  OnNew="() => NavManager.NavigateTo(Paths.CustomerNew)">
+</LoanTrackToolbar>
+
+<div class="row">
+    <div class="col-xl-4 col-xxl-3 mb-2 d-none d-xl-block">
+        <SearchableSelect Placeholder="--- Center ---" T="Guid" ListValues="_centers"
+                          SelectedValue="@_selectedCenterId" SelectedValueChanged="@OnCenterSelected">
+        </SearchableSelect>
+    </div>
+    <div class="col-xl-3 col-xxl-3 mb-2 d-none d-xl-block">
+        <SearchableSelect T="Guid" ListValues="_groups" Placeholder="--- Group ---"
+                          SelectedValue="@_selectedGroupId" SelectedValueChanged="@OnGroupSelected">
+        </SearchableSelect>
+    </div>
+    <div class="col-7 col-sm-8 col-lg-8 col-xl-3 mb-2">
+        <input type="text" aria-label="Search" placeholder="@($"Type here to search By {_searchBy}")" class="form-control" @bind="_searchTerm">
+    </div>
+    <div class="col-5 col-sm-4 col-lg-2 justify-content-end">
+        <button class="btn btn-outline-success" @onclick="ApplyFilter">
+            <i class="bi bi-search btn-icon"></i> Apply
+        </button>
+    </div>
+</div>
+
+<div class="row scrollable-container" style="max-height: 73vh;">
+    @if (Customers is { Count: > 0 })
+    {
+        @foreach (var customer in Customers)
+        {
+            <div class="card card-body w-100 mb-4" style="flex: 0 0 auto !important;">
+                <h5 class="card-title panel-title">@customer.FullName</h5>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Code: </strong>@customer.Code
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Nic: </strong>@customer.Nic
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Phone: </strong>@customer.PhoneNumber
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Center: </strong>@customer.Center
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 mb-1">
+                        <strong>Group: </strong>@customer.Group
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4 col-xxl-2 listView-actions pt-lg-2 pt-xl-2">
+                        <a class="btn btn-outline-primary btn-sm" tabindex="-1" href="@($"{Paths.CustomerView}/{customer.Id}")">
+                            <i class="bi bi-eye-fill"></i> View
+                        </a>
+                        <a class="btn btn-outline-dark btn-sm" tabindex="-1" href="@($"{Paths.CustomerEdit}/{customer.Id}")">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="text-center">
+                <i class="bi bi-database-x mb-4" style="font-size: 50px; color: #9e9e9e;"></i>
+                <h3 class="h4 mb-3">No Results Found</h3>
+            </div>
+        </div>
+    }
+</div>
+
+@if (_totalPages > 1)
+{
+    <div class="row">
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(_currentPage - 1)">Previous</button>
+                </li>
+
+                @foreach (var vPage in VisiblePages)
+                {
+                    <li class="page-item @(vPage == _currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(vPage)">@vPage</button>
+                    </li>
+                }
+
+                <li class="page-item @(_currentPage == _totalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(_currentPage + 1)">Next</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+
+<div class="modal fade" id="filterModal" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-hidden="true" aria-labelledby="filterModalLabel">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="height: 70%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Advance filter</h5>
+                <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAdvanceFilter">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body align-content-center">
+                <div class="row">
+                    <div class="col-sm-12 mb-3">
+                        <SearchableSelect T="Guid" ListValues="_centers" Placeholder="--- Center ---"
+                                          SelectedValue="@_selectedCenterId" SelectedValueChanged="@OnCenterSelected">
+                        </SearchableSelect>
+                    </div>
+                    <div class="col-sm-12 mb-3">
+                        <SearchableSelect T="Guid" ListValues="_groups" Placeholder="--- Group ---"
+                                          SelectedValue="@_selectedGroupId" SelectedValueChanged="@OnGroupSelected">
+                        </SearchableSelect>
+                    </div>
+                    <div class="col-sm-12 mb-3">
+                        <select @bind="_shortBy" class="form-select">
+                            <option value="FullName">Short by Name</option>
+                            <option value="Nic">Short By Nic</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-12 mb-3">
+                        <input type="text" aria-label="Search" placeholder="@($"Type here to search By {_searchBy}")" class="form-control" @bind="_searchTerm">
+                    </div>
+                    <div class="col-sm-12 mb-3">
+                        <select @bind="_searchBy" class="form-select">
+                            <option value="FullName">Search By Name</option>
+                            <option value="Nic">Search By Nic</option>
+                            <option value="PhoneNumber">Search By Phone Number</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-12">
+                        <select class="form-select" @bind="_pageSize">
+                            <option value="10">Page size 10</option>
+                            <option value="50">Page size 50</option>
+                            <option value="100">Page size 100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" @onclick="CloseAdvanceFilter">
+                    <i class="bi bi-x-lg"></i> Close
+                </button>
+                <button type="button" class="btn btn-outline-success" @onclick="ApplyFilter">
+                    <i class="bi bi-search"></i> Apply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.CenterEdit}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<EditForm id="Center" Model="@Entity" OnValidSubmit="OnSubmit" FormName="Center" OnBack="()=> NavManager.NavigateTo(Paths.CentersIndex)">
+    
+    <LoanTrackToolbar ShowSubmit="true" ShowNew="true" OnNew="()=> NavManager.NavigateTo(Paths.CenterNew)"></LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 80vh">
+        <DataAnnotationsValidator/>
+        <div class="col-sm-12 col-md-12 col-lg-8 col-xl-6 col-xxl-6 mb-1">
+            <div class="form-outline mb-4">
+                <label>Name</label>
+                <InputText DisplayName="Name" class="form-control" @bind-Value="Entity.Name"/>
+                <ValidationMessage For="@(() => Entity.Name)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Description</label>
+                <InputTextArea DisplayName="Description" class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.Description)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Find leader by NIC</label>
+                <div class="input-group mb-3">
+                    <InputText class="form-control" @bind-Value="Nic" />
+                    <button class="btn btn-outline-secondary" type="button" @onclick="FindCustomerByNic">Find</button>
+                </div>
+                <InputTextArea rows="6" readonly="true" class="form-control" @bind-Value="SelectedLeader"></InputTextArea>
+            </div>
+        </div>
+    </div>
+</EditForm>

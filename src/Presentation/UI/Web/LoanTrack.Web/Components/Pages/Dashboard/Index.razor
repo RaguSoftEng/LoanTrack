@@ -1,0 +1,153 @@
+@page "/"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject CurrentUserService CurrentUser
+
+@if (_financeSummary is not null)
+{
+    <div class="row g-4 mb-3">
+        @DisplaySummaryItem("Total Loan Issued", _financeSummary.TotalLoanIssued, "bi bi-cash-coin", "primary")
+        @DisplaySummaryItem("Total Insurance", _financeSummary.TotalInsurance, "bi bi-shield-check", "info")
+        @DisplaySummaryItem("Total Collection", _financeSummary.TotalCollection, "bi bi-bank", "success")
+        @DisplaySummaryItem("Capital Gain", _financeSummary.TotalCapitalGain, "bi bi-graph-up", "dark")
+        @if (_isAdmin)
+        {
+            @DisplaySummaryItem("Processing Fee", _financeSummary.TotalProcessFee, "bi bi-gear", "secondary")
+            @DisplaySummaryItem("Penalty Income", _financeSummary.TotalPenalty, "bi bi-exclamation-octagon", "danger")
+            @DisplaySummaryItem("Interest Income", _financeSummary.TotalInterestIncome, "bi bi-percent", "teal")
+            @DisplaySummaryItem("Total Profit", _financeSummary.TotalProfit, "bi bi-bar-chart", "warning")
+        }
+    </div>
+}
+<div class="row">
+    @if (_customersCountsByCentre is {Count:>0})
+    {
+        <div class="mb-3 col-12 col-sm-12 col-lg-6 col-xl-4">
+            <div class="card border-primary p-0">
+                <div class="card-header text-bg-primary">Active customers count</div>
+                <div class="card-body overflow-y-auto">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var centerGroup in _customersCountsByCentre)
+                        {
+                            var centerTotal = centerGroup.Value.Sum(x => x.Count);
+
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>@centerGroup.Key</span>
+                                    <span class="badge text-bg-primary rounded-pill">@centerTotal</span>
+                                </div>
+
+                                <ul class="list-group list-group-flush mt-2">
+                                    @foreach (var group in centerGroup.Value)
+                                    {
+                                        var groupName = string.IsNullOrWhiteSpace(group.Group) ? "Unknown Group" : group.Group;
+                                        <li class="list-group-item d-flex justify-content-between align-items-start ps-4">
+                                            <div class="ms-2 me-auto">
+                                                <div>@groupName</div>
+                                            </div>
+                                            <span class="badge text-bg-secondary rounded-pill">@group.Count</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if (_loanCountsByStatus is { Count: > 0 })
+    {
+        <div class="mb-3 col-12 col-sm-12 col-lg-6 col-xl-4">
+            <div class="card border-success p-0">
+                <div class="card-header text-bg-success">Loan count by status</div>
+                <div class="card-body overflow-y-auto">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var loan in _loanCountsByStatus)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">@loan.Status</div>
+                                </div>
+                                <span class="badge text-bg-primary rounded-pill">@loan.Count</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="mb-3 col-12 col-sm-12 col-lg-6 col-xl-4">
+        <div class="card border-danger p-0">
+            <div class="card-header text-bg-danger">Installments</div>
+            <div class="card-body overflow-y-auto">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Due on today</div>
+                        </div>
+                        <span class="badge text-bg-primary rounded-pill">@_installmentCounts.DueToday</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Over due</div>
+                        </div>
+                        <span class="badge text-bg-primary rounded-pill">@_installmentCounts.Overdue</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    @if (_collections is not null)
+    {
+
+        <div class="col-12">
+            <div class="card border-success p-0">
+                <div class="card-header text-bg-success">
+                    <h5>@($"Total collection for this month ({_collections.StartDate} to {_collections.EndDate}) is ")<strong>@($"{_collections.TotalCollection:##.00}")</strong></h5>
+                </div>
+                <div class="card-body scrollable-container">
+                    <ul class="list-group list-group-flush">
+                        @{
+                            var number = 1;
+                        }
+                        @foreach (var collection in _collections.CenterCollection)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span><strong>@(number++).</strong> @collection.Center</span>
+                                    <span class="badge text-bg-primary rounded-pill" style="font-size: large">@($"{collection.Collection:##.00}")</span>
+                                </div>
+
+                                @{
+                                    var groupItems = _collections.GroupCollection
+                                        .Where(x => x.Center == collection.Center)
+                                        .ToList();
+
+                                    var letter = 'a';
+                                }
+
+                                <ul class="list-group list-group-flush mt-2">
+                                    @foreach (var group in groupItems)
+                                    {
+                                        var groupName = string.IsNullOrWhiteSpace(group.Group) ? "Unknown Group" : group.Group;
+
+                                        <li class="list-group-item d-flex justify-content-between align-items-start ps-4">
+                                            <div class="ms-2 me-auto">
+                                                <div><strong>@(letter++).</strong> @groupName</div>
+                                            </div>
+                                            <span class="badge text-bg-secondary rounded-pill">@($"{group.Collection:##.00}")</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>

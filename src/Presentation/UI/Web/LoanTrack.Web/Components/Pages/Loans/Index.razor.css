@@ -1,0 +1,23 @@
+.status-pending{
+    /*background-color: #e1b93f;*/
+    color: #e1b93f;
+    font-weight: bold;
+}
+
+.status-approved{
+    /*background-color: #198754;*/
+    color: #198754;
+    font-weight: bold;
+}
+
+.status-ongoing{
+    /*background-color: #198754;*/
+    color: #198754;
+    font-weight: bold;
+}
+
+.status-rejected{
+   /* background-color: #dc3545;*/
+    color: #dc3545;
+    font-weight: bold;
+}

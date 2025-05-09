@@ -1,0 +1,96 @@
+﻿@page "/Account/Manage"
+@using LoanTrack.Application.Employees.Commands.Updateprofile
+@using LoanTrack.Application.Employees.Queries.GetUser.ByEmail
+@using Microsoft.AspNetCore.Identity
+@using LoanTrack.Identity.Models
+@using LoanTrack.Web.Shared.Common
+@using LoanTrack.Web.Shared.Employees
+@using MediatR
+
+@inject UserManager<AppIdentityUser> UserManager
+@inject SignInManager<AppIdentityUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IdentityRedirectManager RedirectManager
+@inject ISender Sender
+@inject AppSettingState appSetting
+
+<PageTitle>Profile</PageTitle>
+
+<StatusMessage/>
+
+<div class="row">
+    <div class="col-xl-6">
+        <EditForm Model="_employee" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <input type="text" value="@_username" id="username" class="form-control" placeholder="Choose your username." disabled/>
+                <label for="username" class="form-label">Email / Username</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" value="@_employee.UserRole" id="UserRole" class="form-control" disabled/>
+                <label for="UserRole" class="form-label">User Role</label>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="_employee.FirstName" id="Input.FirstName" class="form-control" />
+                <label for="Input.FirstName" class="form-label">First Name</label>
+                <ValidationMessage For="() => _employee.FirstName" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="_employee.LastName" id="Input.LastName" class="form-control" />
+                <label for="Input.LastName" class="form-label">Last Name</label>
+                <ValidationMessage For="() => _employee.LastName" class="text-danger"/>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private AppIdentityUser _user = default!;
+    private EmployeeVm _employee = new();
+    private string? _username;
+
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    //   [SupplyParameterFromForm] private EmployeeVm Input { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        appSetting.CurrentPageName = "Profile";
+        _user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        _username = await UserManager.GetUserNameAsync(_user);
+        await GetEmployee(_username!);
+    }
+
+    private async Task GetEmployee(string email)
+    {
+        var response = await Sender.Send(new GetUserByEmailQuery(email));
+        if (response.IsSuccess)
+        {
+            var value = response.Value;
+            _employee = new EmployeeVm()
+            {
+                FirstName = value.FirstName,
+                LastName = value.LastName,
+                Email = value.Email,
+                UserRole = value.UserRole
+            };
+        }
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        var response = await Sender.Send(new UpdateProfileCommand(_employee.UserId, _employee.FirstName, _employee.LastName));
+
+        if (response.IsFailure)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus($"Error: {response.Error.Description}", HttpContext);
+        }
+
+        await SignInManager.RefreshSignInAsync(_user);
+        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+    }
+
+}

@@ -1,0 +1,150 @@
+@using LoanTrack.Application.Common.DTOs
+@typeparam T
+
+<div class="searchable-select-box" style="position: relative; width: 100%;" @ref="_componentRef">
+    <div class="input-group">
+        <div class="form-control d-flex justify-content-between align-items-center @(IsDisabled ? "disabled" : "")"
+             @onclick="ShowDropdown"
+             style="cursor: @(IsDisabled ? "not-allowed" : "pointer"); min-height: 38px;">
+            @_selectedItem
+            <i class="bi bi-chevron-down ms-2"></i>
+        </div>
+        <button type="button" class="btn btn-secondary" @onclick="ClearSelection">
+            <i class="bi bi-eraser"></i>
+        </button>
+    </div>
+
+    <div class="dropdown-menu show overflow-x-auto"
+         style="display: @(_isDropdownVisible ? "block" : "none");
+                position: absolute; width: 100%; z-index: 1000; max-height: 200px;
+                @(OpenUpwards ? "bottom: 100%;" : "top: 100%;")"
+         @ref="_dropdownElement">
+        <input type="text" class="form-control" placeholder="Search..." style="width: 96%; margin-left: 0.5rem; margin-bottom: 0.5rem"
+               @bind="_searchText" @bind:event="oninput" @ref="_inputElement" disabled="@IsDisabled"/>
+        
+        @foreach (var item in FilteredItems)
+        {
+            <button type="button" class="dropdown-item" @onclick="() => SelectItem(item.Id, item.Value)">
+                @item.Value
+            </button>
+        }
+    </div>
+
+    <input type="hidden" bind-value="SelectedValue" />
+</div>
+
+@code {
+    [Parameter] public List<ListValueResponse> ListValues { get; set; } = [];
+    [Parameter] public T? SelectedValue { get; set; }
+    [Parameter] public EventCallback<T> SelectedValueChanged { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "--- Select ---";
+
+    private string _searchText = string.Empty;
+    private string _selectedItem = string.Empty;
+    private bool _isDropdownVisible = false;
+    private bool OpenUpwards = false;
+    //private readonly ListValueResponse _default = new(Guid.Empty, "--- Select ---");
+
+    private ElementReference _inputElement;
+    private ElementReference _dropdownElement;
+    private ElementReference _componentRef;
+
+    private IEnumerable<ListValueResponse> FilteredItems =>
+        string.IsNullOrWhiteSpace(_searchText)
+            ? ListValues.Take(10)
+            : ListValues.Where(item => item.Value.Contains(_searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    protected override void OnInitialized()
+    {
+        var selectedItem = ListValues.FirstOrDefault(item => item.IsSelected);
+        SelectedValue = selectedItem is not null ? (T)selectedItem.Id : default;
+        _selectedItem = selectedItem is not null ? selectedItem.Value : Placeholder;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!ListValues.Any())
+        {
+            _selectedItem = Placeholder;
+            SelectedValue = default;
+            return;
+        }
+
+        var selectedItem = ListValues.FirstOrDefault(item => Equals(item.Id, SelectedValue));
+        _selectedItem = selectedItem is not null ? selectedItem.Value : Placeholder;
+        SelectedValue = selectedItem is not null ? (T)selectedItem.Id : default;
+    }
+
+    private async void ShowDropdown()
+    {
+        try
+        {
+            if (IsDisabled) return;
+            _isDropdownVisible = true;
+
+            await Task.Delay(50);
+            await _inputElement.FocusAsync();
+            DetermineDropdownPosition();
+
+            // Attach click-away listener
+            await JSRuntime.InvokeVoidAsync("searchDropdown.registerClickAway", _componentRef, DotNetObjectReference.Create(this));
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private async Task SelectItem(object id, string value)
+    {
+        if (id is T typeId)
+        {
+            SelectedValue = typeId;
+            _selectedItem = value;
+            _isDropdownVisible = false;
+            await SelectedValueChanged.InvokeAsync(SelectedValue);
+        }
+    }
+
+    private async Task ClearSelection()
+    {
+        SelectedValue = default;
+        _selectedItem = Placeholder;
+        HideDropdown(); 
+        await SelectedValueChanged.InvokeAsync(SelectedValue);
+    }
+
+    private async void DetermineDropdownPosition()
+    {
+        try
+        {
+            await Task.Delay(50);
+            var inputRect = await JSRuntime.InvokeAsync<DomRect>("getBoundingClientRect", _inputElement);
+            OpenUpwards = inputRect.Bottom + 200 > inputRect.WindowHeight;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    [JSInvokable]
+    public void HideDropdown()
+    {
+        _isDropdownVisible = false;
+        StateHasChanged();
+    }
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    public class DomRect
+    {
+        public double Top { get; set; }
+        public double Bottom { get; set; }
+        public double Height { get; set; }
+        public double WindowHeight { get; set; }
+    }
+
+}

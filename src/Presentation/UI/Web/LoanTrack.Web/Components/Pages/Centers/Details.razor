@@ -1,0 +1,29 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.CenterView}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="true" ShowDelete="true"
+                  OnBack="()=> NavManager.NavigateTo(Paths.CentersIndex)"
+                  OnNew="()=> NavManager.NavigateTo(Paths.CenterNew)"
+                  OnEdit='()=>NavManager.NavigateTo($"{Paths.CenterEdit}/{Id}")'>
+</LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 80vh">
+    <div class="col-sm-12 col-md-12 col-lg-8 col-xl-6 col-xxl-6 mb-1">
+        <div class="form-outline mb-4">
+            <label>Center Name</label>
+            <InputText readonly="true" class="form-control" @bind-Value="Entity.Name"/>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Description</label>
+            <InputTextArea rows="4" readonly="true" class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+        </div>
+        <div class="form-outline mb-4">
+            <label>Leader</label>
+            <InputTextArea rows="6" readonly="true" class="form-control" @bind-Value="Entity.Leader"> </InputTextArea>
+        </div>
+    </div>
+</div>

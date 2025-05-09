@@ -1,0 +1,32 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.GroupNew)]
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<EditForm id="group" Model="@Entity" OnValidSubmit="OnSubmit" FormName="group">
+    
+    <LoanTrackToolbar ShowSubmit="true" ShowClear="true" OnClear="OnClear" OnBack="()=> navManager.NavigateTo(Paths.GroupIndex)">
+    </LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 80vh; height: 80vh">
+        <DataAnnotationsValidator/>
+        <div class="col-12 col-sm-12 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mb-1">
+            <div class="form-outline mb-4">
+                <label>Name</label>
+                <InputText DisplayName="Name" class="form-control" @bind-Value="Entity.Name"/>
+                <ValidationMessage For="@(() => Entity.Name)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Description</label>
+                <InputTextArea DisplayName="Description" class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+                <ValidationMessage For="@(() => Entity.Description)"/>
+            </div>
+            <div class="form-outline mb-4">
+                <label>Center</label>
+                <SearchableSelect T="Guid" ListValues="_centers" SelectedValue="Entity.CenterId" SelectedValueChanged="@OnSelectedCenterChanged"></SearchableSelect>
+                <ValidationMessage For="@(() => Entity.CenterId)"/>
+            </div>
+        </div>
+    </div>
+</EditForm>

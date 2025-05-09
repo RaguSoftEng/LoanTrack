@@ -1,0 +1,108 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.SchemesView}/{{Id}}")]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="true" ShowDelete="true"
+                  OnNew="()=> NavManager.NavigateTo(Paths.SchemesNew)"
+                  OnEdit='()=> NavManager.NavigateTo($"{Paths.SchemesEdit}/{Entity.Id}")'
+                  OnBack="()=> NavManager.NavigateTo(Paths.SchemesIndex)">
+</LoanTrackToolbar>
+
+    <div class="row scrollable-container" style="max-height: 80vh">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="mb-4">
+                <label>Scheme Code</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Code"/>
+            </div>
+            <div class="mb-4">
+                <label>Scheme Name</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.Name"/>
+            </div>
+            <div class="mb-4">
+                <label>Description</label>
+                <InputTextArea readonly="true" class="form-control" @bind-Value="Entity.Description"></InputTextArea>
+            </div>
+            <div class="mb-4">
+                <label>@($"Interest Rate {Entity.InterestType} (%)")</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InterestRate"/>
+            </div>
+            <div class="mb-4">
+                <label>Minimum Amount</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.MinimumAmount"/>
+            </div>
+            <div class="mb-4">
+                <label>Maximum Amount</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.MaximumAmount"/>
+            </div>
+            <div class="mb-4">
+                <label>Repayment Period (Months)</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.RepaymentPeriodsInMonths"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="mb-4">
+                <label>Processing Fee</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.ProcessingFee"/>
+            </div>
+            <div class="mb-4">
+                <label>Insurance Amount</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InsuranceAmount"/>
+            </div>
+            <div class="mb-4">
+                <label>Late Payment Penalty</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.LatePaymentPenalty"/>
+            </div>
+            <div class="mb-4">
+                <label>Grace Period (Months)</label>
+                <InputNumber readonly="true" class="form-control" @bind-Value="Entity.GracePeriodInMonths"/>
+            </div>
+            <div class="form-check mb-4">
+                <InputCheckbox disabled="true" class="form-check-input" @bind-Value="Entity.IsSecuredLoan"/>
+                <label  class="form-check-label">Requires Collateral</label>
+            </div>
+            <div class="mb-4">
+                <label>Collateral Type</label>
+                <InputText readonly="true" class="form-control" @bind-Value="Entity.CollateralType"/>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-4 mb-1">
+            <div class="form-check">
+                <InputCheckbox disabled="true" class="form-check-input" @bind-Value="Entity.HasFixedInterestRate"/>
+                <label class="form-check-label">Has Fixed Interest Rate</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox disabled="true" class="form-check-input" @bind-Value="Entity.IsGovernmentSubsidized"/>
+                <label class="form-check-label">Government Subsidized</label>
+            </div>
+            <div class="form-check">
+                <InputCheckbox disabled="true" class="form-check-input" @bind-Value="Entity.RequiresGuarantor"/>
+                <label class="form-check-label">Requires Guarantor</label>
+            </div>
+            <div class="form-check mb-4">
+                <InputCheckbox disabled="true" class="form-check-input" @bind-Value="Entity.IsActive"/>
+                <label class="form-check-label">Is Active</label>
+            </div>
+            <div class="mb-4">
+                <h5>Allowed Loan Purposes:</h5>
+                <ul class="list-group">
+                    @foreach (var purpose in Entity.AllowedLoanPurposes)
+                    {
+                        <li class="list-group-item">@purpose</li>
+                    }
+                </ul>
+            </div>
+            <!-- Eligible Borrower Types Section -->
+            <div class="mb-4">
+                <h5>Eligible Borrower Types:</h5>
+                <ul class="list-group">
+                    @foreach (var type in Entity.EligibleBorrowerTypes)
+                    {
+                        <li class="list-group-item">@type</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>

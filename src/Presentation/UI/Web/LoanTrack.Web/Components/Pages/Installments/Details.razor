@@ -1,0 +1,91 @@
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.InstallmentViewPath)]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar @ref="ToolbarRef" >
+</LoanTrackToolbar>
+
+@if (_entity is not null)
+{
+    <div class="row scrollable-container" style="max-height: 73vh">
+        <div class="col-sm-12 col-lg-6 mb-1">
+            <div class="card card-body mb-4">
+                <h4 class="card-title panel-title">Installment Info</h4>
+                <div class="row mb-3">
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Loan No#</label>
+                        <input type="text" readonly class="form-control" value="@_entity.LoanNumber">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Inst No#</label>
+                        <input type="text" readonly class="form-control" value="@_entity.InstallmentNumber">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Inst Date</label>
+                        <input readonly class="form-control" value="@_entity.InstallmentDate">
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-xl-3">
+                        <label>Amount</label>
+                        <input readonly class="form-control" value="@_entity.InstallmentAmount">
+                    </div>
+                </div>
+            </div>
+
+            @if (_entity.IsDelayed)
+            {
+                <div class="card card-body border-danger mb-4">
+                    <h4 class="card-title panel-title">Penalty</h4>
+                    <div class="alert align-items-center" style="background-color: firebrick" role="alert">
+                        <span class="card-text delayedWarning mb-3"><i class="bi bi-bell-slash"></i> @($"Delayed for {_entity.DelayedDays} days!.")</span>
+                        @if (_entity.IsPenaltyApplied)
+                        {
+                            <p class="card-text" style="color: #ffffff">Penalty Applied</p>
+                        }
+                    </div>
+                    @if (_entity.IsPenaltyApplied)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label>Penalty Amount</label>
+                                <input readonly class="form-control" value="@_entity.PenaltyAmount">
+                            </div>
+                        </div>
+                        <div class="form-outline mb-4">
+                            <label>Penalty Reason</label>
+                            <textarea rows="3" readonly class="form-control" value="@_entity.PenaltyReason"></textarea>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        @if (_entity.IsPaid)
+        {
+            <div class="col-sm-12 col-lg-6 mb-1">
+                <div class="card card-body">
+                    <h5 class="card-title panel-title">Payment</h5>
+                    <div class="row mb-3">
+                        <div class="col-sm-12 col-xl-4">
+                            <label>Date</label>
+                            <input readonly type="date" class="form-control" value="@_entity.PaymentDate"/>
+                        </div>
+                        <div class="col-sm-12 col-xl-4">
+                            <label>Method</label>
+                            <input readonly class="form-control" value="@_entity.PaymentMethod"/>
+                        </div>
+                        <div class="col-sm-12 col-xl-4">
+                            <label>Amount</label>
+                            <input readonly class="form-control" value="@_entity.AmountPaid" />
+                        </div>
+                    </div>
+                    <div class="form-outline">
+                        <label>Description</label>
+                        <textarea rows="3" readonly class="form-control" value="@_entity.PaymentDescription"></textarea>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

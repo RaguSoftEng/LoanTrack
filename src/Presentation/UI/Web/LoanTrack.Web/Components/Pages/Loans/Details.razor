@@ -1,0 +1,161 @@
+@using LoanTrack.Domain.Common.Constants
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route($"{Paths.LoanView}/{{Id}}")]
+@rendermode InteractiveServer
+@inject NavigationManager NavManager
+@attribute [Authorize]
+
+<BlazoredToasts/>
+<LoanTrackToolbar ShowNew="true" ShowEdit="@_isEditable" ShowDelete="@_isEditable" 
+                  OnNew="()=> NavManager.NavigateTo(Paths.LoanNew)"
+                  OnEdit='()=>NavManager.NavigateTo($"{Paths.LoanEdit}/{Id}")'
+                  OnBack="()=> NavManager.NavigateTo(Paths.LoansIndex)"
+                  @ref="_toobarRef" >
+</LoanTrackToolbar>
+
+<div class="row scrollable-container" style="max-height: 70vh">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-7 col-xxl-7 mb-1 mb-xxl-3 mb-xl-3">
+        <div class="form-outline mb-2 card card-body">
+            <h5 class="card-title panel-title">Customer information</h5>
+            <div class="row mb-md-3 mb-lg-1">
+                <div class="form-outline mb-2">
+                    <label>Loan Number</label>
+                    <div class="input-group @_statusCss">
+                        <input type="text" readonly class="form-control col-6" value="@Entity.LoanNumber">
+                        <span class="input-group-text col-6">@Entity.LoanStatus</span>
+                    </div>
+                </div>
+                <div class="form-outline">
+                    <label>Customer</label>
+                    <InputTextArea rows="3" readonly="true" class="form-control" @bind-Value="Entity.Customer"></InputTextArea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-5 col-xxl-5 mb-3">
+        <div class="form-outline mb-2 card card-body">
+            <div class="row mb-2">
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-md-1">
+                    <label>Scheme</label>
+                    <InputText readonly="true" class="form-control" @bind-Value="Entity.LoanScheme"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label class="required">Amount</label>
+                    <InputNumber readonly="true" TValue="double" class="form-control" @bind-Value="Entity.LoanAmount"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label>Total Amount payable</label>
+                    <InputNumber readonly="true" TValue="double" class="form-control" @bind-Value="Entity.TotalAmountPayable"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label>Balance</label>
+                    <InputNumber readonly="true" TValue="double" class="form-control" @bind-Value="Entity.Arrears"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6 mb-md-3">
+                    <label>Issuance</label>
+                    <InputDate readonly="true" class="form-control" @bind-Value="Entity.IssuanceDate"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label>Disbursement</label>
+                    <InputText readonly="true" class="form-control" @bind-Value="Entity.LoanDisbursementMethod"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label class="required">Processing Fee</label>
+                    <InputNumber readonly="true" class="form-control" @bind-Value="Entity.ProcessingFee"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 col-xxl-6">
+                    <label class="required">Insurance</label>
+                    <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InsuranceAmount"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-7 col-xxl-7 mb-1">
+        <div class="form-outline mb-4 card card-body">
+            <h5 class="card-title panel-title">Interest</h5>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 mb-md-3">
+                    <label>Type</label>
+                    <InputText readonly="true" class="form-control" @bind-Value="Entity.InterestType"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-3 col-xxl-3 mb-md-3">
+                    <label>Rate(%)</label>
+                    <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InterestRate"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-5 col-xxl-5">
+                    <label class="required">@($"Duration in {GetBaseUnit(Entity.InterestType)}")</label>
+                    <InputNumber readonly="true" TValue="int" class="form-control" @bind-Value="Entity.DurationInInterestUnits"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-outline mb-3 card card-body">
+            <h5 class="card-title panel-title">Installment</h5>
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 mb-md-3">
+                    <label>Type</label>
+                    <InputText readonly="true" class="form-control" @bind-Value="Entity.InstallmentType"/>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-3 col-xxl-3 mb-md-3">
+                    <label>Duration</label>
+                    <InputNumber readonly="true" class="form-control" @bind-Value="Entity.RepaymentDurations"></InputNumber>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-5 col-xxl-5">
+                    <label>Amount</label>
+                    <InputNumber readonly="true" class="form-control" @bind-Value="Entity.InstallmentAmount"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-outline">
+                    <label>Repayment Method</label>
+                    <InputText readonly="true" class="form-control" @bind-Value="Entity.LoanRepaymentMethod"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-5 col-xxl-5 mb-1">
+        <div class="form-outline mb-4">
+            <label>Guarantors Information</label>
+            <InputTextArea readonly="true" class="form-control" @bind-Value="Entity.GuarantorsInformation"></InputTextArea>
+        </div>
+        <div class="form-outline mb-xl-2 mb-xxl-2 mb-3 row">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6 col-xl-6 mb-md-3">
+                <label>End Date</label>
+                <InputDate readonly="true" DisplayName="Date of birth" class="form-control" @bind-Value="Entity.EndDate"/>
+            </div>
+            @if (Entity.LoanStatus != LoanStatuses.Closed)
+            {
+                <div class="col-6 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <label>Next Installment Date</label>
+                    <InputDate readonly="true" DisplayName="Date of birth" class="form-control" @bind-Value="Entity.FirstInstallmentDate"/>
+                </div>
+            }
+            else
+            {
+                <div class="col-6 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <label>Closed Date</label>
+                    <InputDate readonly="true" DisplayName="Date of birth" class="form-control" @bind-Value="Entity.ClosedDate"/>
+                </div>
+            }
+        </div>
+        <div class="form-outline mb-4">
+            <label>Loan Officer</label>
+            <InputTextArea readonly="true" rows="3" class="form-control" @bind-Value="Entity.LoanOfficer"></InputTextArea>
+        </div>
+    </div>
+</div>
+
+@if (Entity.LoanStatus is LoanStatuses.Approved or LoanStatuses.Pending)
+{
+    <StatusUpdate @ref="_statusUpdate" Entity="@Entity" OnSubmit="SubmitStatus"></StatusUpdate>
+}
+
+@if (Entity.LoanStatus is LoanStatuses.Ongoing)
+{
+    <StatusUpdate @ref="_statusUpdate" Entity="@Entity" OnSubmit="SubmitStatus"></StatusUpdate>
+}

@@ -1,0 +1,128 @@
+@using LoanTrack.Web.Shared.Common
+@using Microsoft.AspNetCore.Authorization
+@attribute [Route(Paths.NextInstallmentsIndex)]
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<BlazoredToasts/>
+@if (_isFiltered)
+{
+    <LoanTrackToolbar OnBack="OnBackClicked" ShowSubmit="true" OnSubmit="OnSubmitClicked" @ref="_toolbar"></LoanTrackToolbar>
+}
+
+@if (!_isFiltered)
+{
+    <div class="row mt-5">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-6 mb-4">
+            <div class="card card-body">
+                <h4 class="card-title panel-title">Filter by Center & Group</h4>
+                <div class="col-12 mb-1">
+                    <label class="form-range">Center</label>
+                    <SearchableSelect T="Guid" ListValues="_centers"
+                                      Placeholder="--- All ---"
+                                      SelectedValue="_selectedCenterId"
+                                      SelectedValueChanged="OnCenterSelected">
+                    </SearchableSelect>
+                </div>
+                <div class="col-12 mb-2">
+                    <label class="form-range">Group</label>
+                    <SearchableSelect IsDisabled="@(_selectedCenterId == Guid.Empty)" T="Guid"
+                                      Placeholder="--- All ---"
+                                      ListValues="_groups" SelectedValue="_selectedGroupId"
+                                      SelectedValueChanged="(x) => _selectedGroupId = x">
+                    </SearchableSelect>
+                </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5 d-grid align-self-end">
+                    <button type="button" class="btn btn-outline-success" @onclick="GetNextInstallmentsAsync">
+                        <i class="bi bi-search btn-icon"></i>Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-5 mb-1 offset-xl-1">
+            <div class="card card-body">
+                <h4 class="card-title panel-title">Filter by Customer</h4>
+                <div class="input-group">
+                    <InputText placeholder="Find by customer NIC" class="form-control" @bind-Value="_nic"/>
+                    <button disabled="@(string.IsNullOrEmpty(_nic))" class="btn btn-success" type="button" @onclick="FindCustomerByNic">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <button disabled="@(string.IsNullOrEmpty(_nic))" class="btn btn-outline-dark" type="button" @onclick="ClearCustomer">
+                        <i class="bi bi-eraser"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+ @if (_isFiltered)
+ {
+     <div class="row" style="justify-self: end">
+         <div class="col-sm-12 col-md-12 col-lg-6">
+             <div class="input-group">
+                 <span class="input-group-text" id="basic-addon3">Payment Total</span>
+                 <input type="text" class="form-control" value="@PaymentTotal"/>
+             </div>
+         </div>
+         <div class="col-sm-12 col-md-12 col-lg-6">
+             <div class="input-group">
+                 <span class="input-group-text" id="basic-addon3">Payment Date</span>
+                 <InputDate class="form-control" TValue="DateOnly?" @bind-Value="_paymentDate" @bind-Value:event="onchange" ValueChanged="UpdatePaymentDate"></InputDate>
+             </div>
+         </div>
+     </div>
+     <div class="row mt-5 scrollable-container" style="max-height: 70vh">
+         @if (_installments is { Count: > 0 })
+         {
+                 @foreach (var entity in _installments)
+                 {
+                         <div class="card card-body w-100 mb-4" style="flex: 0 0 auto !important;">
+                             <h5 class="card-title panel-title">@($"{entity.Customer}")</h5>
+                             <div class="row">
+                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 col-xxl-3 mb-1 mb-lg-2">
+                                     <strong>@($"Loan No: {entity.LoanNumber}")</strong>
+                                 </div>
+                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 col-xxl-3 mb-1 mb-lg-2">
+                                     <strong>@($"Inst No#: {entity.InstallmentNumber.ToOrdinal()}")</strong>
+                                 </div>
+                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 col-xxl-3 mb-1 mb-lg-2">
+                                     <strong>@($"Balance: {entity.LoanBalance:##.00}")</strong>
+                                 </div>
+                                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-3 col-xxl-3 mb-1 mb-lg-2">
+                                     <strong>@($"Inst Date: {entity.InstallmentDate.ToString()}")</strong>
+                                 </div>
+                                 <div class="col-sm-12 col-md-7 col-lg-4 col-xl-2 col-xxl-3 mb-1">
+                                     <strong>@($"Inst Amount: {entity.InstallmentAmount:##.00}")</strong>
+                                 </div>
+                                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-1">
+                                     <strong>Payment Date:</strong>
+                                     <InputDate class="form-control form-control-sm" TValue="DateOnly" @bind-Value="entity.PaymentDate"></InputDate>
+                                 </div>
+                                 <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-3 mb-2">
+                                     <strong>Payment Amount:</strong>
+                                     <InputNumber class="form-control form-control-sm" TValue="double" @bind-Value="entity.PaymentAmount"></InputNumber>
+                                 </div>
+                                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-4 col-xxl-3 listView-actions pt-lg-2 pt-xl-2">
+                                     <a class="btn btn-outline-primary btn-sm" tabindex="-1" href="@(string.Format(Paths.InstallmentView, @entity.LoanId, entity.InstallmentId))">
+                                         <i class="bi bi-eye-fill"></i> View
+                                     </a>
+                                     <a class="btn btn-outline-dark btn-sm" tabindex="-1" @onclick="()=>RemoveInstallment(entity.InstallmentId)">
+                                         <i class="bi bi-x"></i> Remove
+                                     </a>
+                                     <a class="btn btn-outline-success btn-sm" tabindex="-1" href="@(string.Format(Paths.InstallmentPaymentPath, @entity.LoanId, entity.InstallmentId))">
+                                         <i class="bi bi-paypal"></i> Pay
+                                     </a>
+                                 </div>
+                             </div>
+                         </div>
+                 }
+         }
+         else if (_installments != null)
+         {
+             <h3 class="justify-content-center">Installments not found</h3>
+         }
+     </div>
+ }

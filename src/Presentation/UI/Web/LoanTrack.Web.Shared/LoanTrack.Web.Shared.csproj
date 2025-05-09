@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\..\Core\LoanTrack.Application\LoanTrack.Application.csproj" />
+    </ItemGroup>
+
+</Project>

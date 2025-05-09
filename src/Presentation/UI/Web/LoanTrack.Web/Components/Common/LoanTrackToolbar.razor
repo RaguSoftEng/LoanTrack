@@ -1,0 +1,117 @@
+@inject NavigationManager NavManager
+@inject IJSRuntime JsRuntime
+
+<div class="toolbar btn-toolbar border-bottom border-success pb-1 mb-3">
+    @if (ShowBack)
+    {
+        <button type="button" class="btn btn-outline-success" @onclick="HandleBack">
+            <i class="bi bi-box-arrow-left btn-icon"></i> Back
+        </button>
+    }
+    @if (ShowNew)
+    {
+        <button type="button" class="btn btn-outline-success" @onclick="OnNew">
+            <i class="bi bi-folder-plus btn-icon"></i> New
+        </button>
+    }
+    @if (ShowEdit)
+    {
+        <button type="button" class="btn btn-outline-success" @onclick="OnEdit">
+            <i class="bi bi-pencil-square btn-icon"></i> Edit
+        </button>
+    }
+    @if (ShowDelete)
+    {
+        <button type="button" class="btn btn-outline-danger" @onclick="OnDelete">
+            <i class="bi bi-trash btn-icon"></i> Delete
+        </button>
+    }
+    @if (ShowSubmit)
+    {
+        <button type="submit" class="btn btn-outline-success" @onclick="OnSubmit">
+            <i class="bi bi-save btn-icon"></i> Submit
+        </button>
+    }
+    @if (ShowClear)
+    {
+        <button type="reset" class="btn btn-outline-success" @onclick="OnClear">
+            <i class="bi bi-eraser btn-icon"></i> Clear
+        </button>
+    }
+
+    @if (AdditionalButtons.Any())
+    {
+        <div class="vr mx-2"></div>
+    }
+
+    @foreach (var button in AdditionalButtons)
+    {
+        <button type="button" class="btn @button.CssClass" @attributes="button.Attributes" @onclick="() => InvokeIfPresent(button.Callback)">
+            <i class="bi @button.Icon btn-icon"></i> @button.Text
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback OnNew { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    [Parameter] public bool ShowNew { get; set; }
+    [Parameter] public bool ShowEdit { get; set; }
+    [Parameter] public bool ShowDelete { get; set; }
+    [Parameter] public bool ShowBack { get; set; } = true;
+    [Parameter] public bool ShowSubmit { get; set; }
+    [Parameter] public bool ShowClear { get; set; }
+    private List<DynamicButton> AdditionalButtons = new();
+    
+
+    private async Task HandleBack()
+    {
+        if (OnBack.HasDelegate)
+            await OnBack.InvokeAsync();
+        else
+            await JsRuntime.InvokeVoidAsync("window.history.back");
+    }
+    
+    private class DynamicButton
+    {
+        public string Id { get; set; } = "";
+        public string Text { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public EventCallback? Callback { get; set; }
+        public string CssClass { get; set; } = "btn-outline-success";
+        public Dictionary<string, object>? Attributes { get; set; } = new();
+    }
+    
+    public void AddButton(string id, string text, string icon, EventCallback? callback = null, string cssClass = "btn-outline-success", Dictionary<string, object>? attributes = null)
+    {
+        AdditionalButtons.Add(new DynamicButton
+        {
+            Id = id,
+            Text = text,
+            Icon = icon,
+            Callback = callback,
+            CssClass = cssClass,
+            Attributes = attributes
+        });
+        StateHasChanged();
+    }
+
+    public void RemoveButton(string id)
+    {
+        AdditionalButtons.RemoveAll(x => x.Id == id);
+        StateHasChanged();
+    }
+    
+    private async Task InvokeIfPresent(EventCallback? callback)
+    {
+        if (callback?.HasDelegate == true)
+        {
+            await callback.Value.InvokeAsync();
+        }
+    }
+}

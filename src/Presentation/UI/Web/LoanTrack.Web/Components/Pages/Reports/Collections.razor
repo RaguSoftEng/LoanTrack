@@ -1,0 +1,76 @@
+@page "/Collections"
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<div class="row">
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3">
+        <label class="form-label">Start Date</label>
+        <InputDate TValue="DateOnly" class="form-control" @bind-Value="_startDate"></InputDate>
+    </div>
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3">
+        <label class="form-label">End Date</label>
+        <InputDate TValue="DateOnly" class="form-control" @bind-Value="_endDate"></InputDate>
+    </div>
+    <div class="col-12 col-sm-12 col-md-4 col-xl-3 mb-3 listView-actions">
+        <button type="button" class="btn btn-outline-success" @onclick="GetDataAsync">
+            <i class="bi bi-search btn-icon"></i> Search
+        </button>
+        @if (_collection is not null)
+        {
+            <button type="button" class="btn btn-outline-success d-none d-lg-block" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print
+            </button>
+        }
+    </div>
+</div>
+
+@if (_collection is not null)
+{
+
+    <div class="row">
+        <div class="card border-success p-0 print-section">
+            <div class="card-header text-bg-success">
+                <h3>@($"Total collection from {_startDate} to {_endDate} is {_collection.TotalCollection:##.00}")</h3>
+            </div>
+            <div class="card-body scrollable-container">
+                <ul class="list-group list-group-flush">
+                    @{
+                        var number = 1;
+                    }
+                    @foreach (var collection in _collection.CenterCollection)
+                    {
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span><strong>@(number++).</strong> @collection.Center</span>
+                                <span class="badge text-bg-primary rounded-pill" style="font-size: large">@($"{collection.Collection:##.00}")</span>
+                            </div>
+
+                            @{
+                                var groupItems = _collection.GroupCollection
+                                    .Where(x => x.Center == collection.Center)
+                                    .ToList();
+
+                                var letter = 'a';
+                            }
+
+                            <ul class="list-group list-group-flush mt-2">
+                                @foreach (var group in groupItems)
+                                {
+                                    var groupName = string.IsNullOrWhiteSpace(group.Group) ? "Unknown Group" : group.Group;
+
+                                    <li class="list-group-item d-flex justify-content-between align-items-start ps-4">
+                                        <div class="ms-2 me-auto">
+                                            <div><strong>@(letter++).</strong> @groupName</div>
+                                        </div>
+                                        <span class="badge text-bg-secondary rounded-pill">@($"{group.Collection:##.00}")</span>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}

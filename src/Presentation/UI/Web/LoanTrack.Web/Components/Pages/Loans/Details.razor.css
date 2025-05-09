@@ -1,0 +1,43 @@
+.status-pending{
+    border-color: #e1b93f;
+}
+.status-pending > span {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: x-large;
+    background-color: #e1b93f;
+    justify-content: center;
+}
+
+.status-approved{
+    border-color: #198754;
+}
+.status-approved > span {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: x-large;
+    background-color: #198754;
+    justify-content: center;
+}
+
+.status-ongoing{
+    border-color: #198754;
+}
+.status-ongoing > span {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: x-large;
+    background-color: #198754;
+    justify-content: center;
+}
+
+.status-rejected{
+    border-color: #dc3545;
+}
+.status-rejected > span {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: x-large;
+    background-color: #dc3545;
+    justify-content: center;
+}
